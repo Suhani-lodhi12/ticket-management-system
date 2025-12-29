@@ -1,1 +1,13 @@
 
+mysql_host - mysql.railway.internal
+MYSQLPORT - 3306
+MYSQL_DATABASE - railway
+MYSQLUSER - root
+MYSQLPASSWORD - VXulTJDerRlQdZCQTnpDteFsgjzKXAXc
+
+
+
+
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdWhhbmlAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NjY2NjA4NjQsImV4cCI6MTc2NjY2NDQ2NH0.X0vQ9XS2RInJVuoO4ZS37YH8cdQlsVPjR568rAtromY",
+    "role": "USER",
+    "userName": "Suhani"
