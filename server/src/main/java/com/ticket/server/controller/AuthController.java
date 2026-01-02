@@ -26,6 +26,10 @@ public class AuthController {
         User user = userService.getUserByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
+            System.out.println("DB Password = [" + user.getPassword() + "]");
+System.out.println("Input Password = [" + loginRequest.getPassword() + "]");
+
+
         // TEMPORARY password check (plain text)
         if (!user.getPassword().equals(loginRequest.getPassword())) {
             throw new RuntimeException("Invalid email or password");

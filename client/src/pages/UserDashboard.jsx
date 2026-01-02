@@ -1,31 +1,49 @@
-// import "../styles/dashboard.css";
-import { useNavigate } from "react-router-dom";
-
+import "../styles/dashboard.css";
+import { useState } from "react";
+import CreateTicket from "../components/CreateTicket";
+import MyTickets from "../components/MyTickets";
 export default function UserDashboard() {
-
-  const navigate = useNavigate();
   const userName = localStorage.getItem("userName");
 
-  const logout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
+  // ⭐ CONTROL WHICH SECTION IS OPEN
+  const [activeSection, setActiveSection] = useState(null);
 
   return (
     <div className="dashboard">
-      <aside className="sidebar">
-        <h2>USER</h2>
+      {/* NAVBAR */}
+      <div className="navbar">
+        <h3>USER</h3>
+        <div>
+          <button onClick={() => setActiveSection("create")}>
+            Create Ticket
+          </button>
 
-        <button>Create Ticket</button>
-        <button>My Tickets</button>
+          <button onClick={() => setActiveSection("tickets")}>
+            My Tickets
+          </button>
 
-        <button className="logout" onClick={logout}>Logout</button>
-      </aside>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = "/";
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
-      <main className="content">
-        <h1>Welcome, {userName}</h1>
-        <p>Create and track your support tickets</p>
-      </main>
+      {/* WELCOME SECTION */}
+      {activeSection === null && (
+        <div className="welcome">
+          <h1>Welcome, {userName}</h1>
+          <p>Create and track your support tickets</p>
+        </div>
+      )}
+
+      {/* ⭐ CONDITIONAL RENDERING */}
+      {activeSection === "create" && <CreateTicket />}
+      {activeSection === "tickets" && <MyTickets />}
     </div>
   );
 }
