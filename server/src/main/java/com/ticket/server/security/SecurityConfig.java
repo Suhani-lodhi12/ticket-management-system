@@ -2,6 +2,7 @@ package com.ticket.server.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,35 +21,43 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            // VERY IMPORTANT (CORS ENABLE)
-            .cors(cors -> {})
+                .cors(cors -> {
+                })
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
 
-            .csrf(csrf -> csrf.disable())
+                        // PUBLIC
+                        .requestMatchers("/api/auth/**").permitAll()
 
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                        // CREATE TICKET → USER + ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/tickets")
+                        .hasAnyRole("USER", "ADMIN")
 
-            .authorizeHttpRequests(auth -> auth
-                // LOGIN FREE
-                .requestMatchers("/api/auth/**").permitAll()
+                        // ADMIN → ALL TICKETS
+                        .requestMatchers(HttpMethod.GET, "/api/tickets")
+                        .hasRole("ADMIN")
 
-                // ADMIN only
-                .requestMatchers("/api/tickets/*/assign/*").hasRole("ADMIN")
+                        // USER → MY TICKETS
+                        .requestMatchers(HttpMethod.GET, "/api/tickets/my-created/**")
+                        .hasRole("USER")
 
-                // ADMIN + AGENT
-                .requestMatchers("/api/tickets/*/status/*")
-                .hasAnyRole("ADMIN", "AGENT")
+                        // ASSIGN → ADMIN
+                        .requestMatchers("/api/tickets/*/assign/*")
+                        .hasRole("ADMIN")
 
-                // AUTH REQUIRED
-                .requestMatchers("/api/tickets/**", "/api/categories/**")
-                .authenticated()
+                        // STATUS → ADMIN + AGENT
+                        .requestMatchers("/api/tickets/*/status/*")
+                        .hasAnyRole("ADMIN", "AGENT")
 
-                .anyRequest().authenticated()
-            )
+                        // ALL OTHER TICKET APIs NEED AUTH
+                        .requestMatchers("/api/tickets/**")
+                        .authenticated()
 
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }

@@ -2,11 +2,14 @@ package com.ticket.server.service;
 
 import com.ticket.server.dto.TicketResponseDTO;
 import com.ticket.server.entity.Ticket;
+import com.ticket.server.entity.TicketCategory;
 import com.ticket.server.entity.TicketStatus;
 import com.ticket.server.entity.User;
+import com.ticket.server.repository.TicketCategoryRepository;
 import com.ticket.server.repository.TicketRepository;
 import com.ticket.server.repository.UserRepository;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,18 +21,45 @@ public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final TicketCategoryRepository categoryRepository;
 
     public TicketServiceImpl(
             TicketRepository ticketRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            TicketCategoryRepository categoryRepository) {
+
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
+    // public Ticket createTicket(Ticket ticket) {
+    // ticket.setCreatedAt(LocalDateTime.now());
+    // ticket.setUpdatedAt(LocalDateTime.now());
+    // return ticketRepository.save(ticket);
+    // }
+
     public Ticket createTicket(Ticket ticket) {
-        ticket.setCreatedAt(LocalDateTime.now());
-        ticket.setUpdatedAt(LocalDateTime.now());
+
+        // 1️⃣ Logged-in user email from JWT
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 2️⃣ Default category (must exist in DB)
+        TicketCategory category = categoryRepository.findByCategoryName("General")
+                .orElseThrow(() -> new RuntimeException("Default category missing"));
+
+        // 3️⃣ Mandatory fields
+        ticket.setCreatedBy(user);
+        ticket.setCategory(category);
+        ticket.setStatus(TicketStatus.NEW);
+
         return ticketRepository.save(ticket);
     }
 

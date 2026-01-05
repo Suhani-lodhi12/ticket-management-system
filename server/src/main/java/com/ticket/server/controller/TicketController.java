@@ -34,11 +34,13 @@ public class TicketController {
     @PostMapping
     public TicketResponseDTO createTicket(@RequestBody Ticket ticket) {
 
-        ticket.setStatus(TicketStatus.NEW);
+        // ticket.setStatus(TicketStatus.NEW);
         Ticket savedTicket = ticketService.createTicket(ticket);
 
         return ticketService.mapToDTO(savedTicket);
     }
+
+// 
 
     @GetMapping
     public List<TicketResponseDTO> getAllTickets(

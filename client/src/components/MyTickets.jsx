@@ -1,20 +1,65 @@
 import "../styles/dashboard.css";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 
 export default function MyTickets() {
 
-  const tickets = [
-    { id: 1, title: "Laptop Issue", status: "NEW" },
-    { id: 2, title: "WiFi Problem", status: "RESOLVED" }
-  ];
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    const fetchTickets = async () => {
+      try {
+        const res = await api.get("/tickets", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        setTickets(res.data);
+
+      } catch (err) {
+        console.error(err);
+        setTickets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTickets();
+  }, []);
 
   return (
-    <div className="ticket-list">
-      {tickets.map(t => (
-        <div className="ticket-card" key={t.id}>
-          <h4>{t.title}</h4>
-          <p className={t.status}>{t.status}</p>
-        </div>
-      ))}
+    <div className="center-wrapper">
+      <div className="card wide">
+
+        <h2>My Tickets</h2>
+
+        {loading && <p>Loading tickets...</p>}
+
+        {!loading && tickets.length === 0 && (
+          <p>No tickets created yet</p>
+        )}
+
+        {!loading && tickets.map(ticket => (
+          <div className="ticket-card" key={ticket.ticketId}>
+            <h4>{ticket.title}</h4>
+
+            <p>
+              Status:{" "}
+              <span className={`status ${ticket.status}`}>
+                {ticket.status}
+              </span>
+            </p>
+
+            <p>
+              Priority: <strong>{ticket.priority}</strong>
+            </p>
+          </div>
+        ))}
+
+      </div>
     </div>
   );
 }

@@ -1,10 +1,11 @@
 package com.ticket.server.security;
 
 import jakarta.servlet.FilterChain;
+import com.ticket.server.security.JwtUtil;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,18 +32,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // ADD THIS BLOCK (NEW)
+        //  LOGIN API should bypass JWT filter
         String path = request.getServletPath();
         if (path.startsWith("/api/auth")) {
-            // Login / register → JWT check nahi lagega
             filterChain.doFilter(request, response);
             return;
         }
-        // END CHANGE
 
         String authHeader = request.getHeader("Authorization");
 
-        // No token → block request
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -50,20 +48,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        // Invalid token
         if (!jwtUtil.validateToken(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // Extract data from token
         String email = jwtUtil.extractEmail(token);
         String role = jwtUtil.extractRole(token);
 
-        // Authentication object
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        email,   // ✅ principal correct
+                        email,
                         null,
                         List.of(new SimpleGrantedAuthority("ROLE_" + role))
                 );
