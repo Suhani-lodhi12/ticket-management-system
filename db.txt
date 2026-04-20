@@ -11,3 +11,9 @@ MYSQLPASSWORD - VXulTJDerRlQdZCQTnpDteFsgjzKXAXc
   "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdWhhbmlAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NjY2NjA4NjQsImV4cCI6MTc2NjY2NDQ2NH0.X0vQ9XS2RInJVuoO4ZS37YH8cdQlsVPjR568rAtromY",
     "role": "USER",
     "userName": "Suhani"
+
+
+
+    for TiDB------------------
+    password-B7WjkarwyTZA4UG2
+    url-jdbc:mysql://ykg8gP5mmQkdozJ.root:B7WjkarwyTZA4UG2@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/ticketdb?sslMode=VERIFY_IDENTITY
