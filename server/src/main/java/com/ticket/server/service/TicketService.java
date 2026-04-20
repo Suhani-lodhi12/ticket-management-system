@@ -12,9 +12,14 @@ public interface TicketService {
 
     Ticket createTicket(Ticket ticket);
 
+    List<TicketResponseDTO> getMyTickets(String token);
+
+    List<TicketResponseDTO> getAllTickets();
+
+//---------------------------------------------------------------
     Optional<Ticket> getTicketById(Long ticketId);
 
-    List<Ticket> getAllTickets();
+    // List<Ticket> getAllTickets();
 
     List<Ticket> getTicketsByCreator(User user);
 
