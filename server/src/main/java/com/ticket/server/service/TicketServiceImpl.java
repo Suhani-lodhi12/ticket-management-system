@@ -8,6 +8,7 @@ import com.ticket.server.entity.User;
 import com.ticket.server.repository.TicketCategoryRepository;
 import com.ticket.server.repository.TicketRepository;
 import com.ticket.server.repository.UserRepository;
+import com.ticket.server.security.JwtUtil;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,15 +23,18 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final TicketCategoryRepository categoryRepository;
+    private final JwtUtil jwtUtil;
 
     public TicketServiceImpl(
             TicketRepository ticketRepository,
             UserRepository userRepository,
-            TicketCategoryRepository categoryRepository) {
+            TicketCategoryRepository categoryRepository,
+            JwtUtil jwtUtil) {
 
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -63,15 +67,44 @@ public class TicketServiceImpl implements TicketService {
         return ticketRepository.save(ticket);
     }
 
+    //-----------------------------------------
+     // ✅ USER → MY TICKETS
+    @Override
+    public List<TicketResponseDTO> getMyTickets(String token) {
+
+        String email = jwtUtil.extractEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return ticketRepository.findByCreatedBy(user)
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+    //--------------------------------------
+
+     // ✅ ADMIN → ALL TICKETS
+    @Override
+    public List<TicketResponseDTO> getAllTickets() {
+
+        return ticketRepository.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    //-------------------------------------------
+
     @Override
     public Optional<Ticket> getTicketById(Long ticketId) {
         return ticketRepository.findById(ticketId);
     }
 
-    @Override
-    public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
-    }
+    // @Override
+    // public List<Ticket> getAllTickets() {
+    //     return ticketRepository.findAll();
+    // }
 
     @Override
     public List<Ticket> getTicketsByCreator(User user) {
