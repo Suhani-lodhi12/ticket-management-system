@@ -6,28 +6,13 @@ export default function MyTickets() {
 
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-
-    const fetchTickets = async () => {
-      try {
-        const res = await api.get("/tickets", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        setTickets(res.data);
-
-      } catch (err) {
-        console.error(err);
-        setTickets([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTickets();
+    api.get("/tickets/my-created")
+      .then(res => setTickets(res.data))
+      .catch(() => setError("Failed to load tickets"))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -38,24 +23,20 @@ export default function MyTickets() {
 
         {loading && <p>Loading tickets...</p>}
 
-        {!loading && tickets.length === 0 && (
+        {error && <p className="error-text">{error}</p>}
+
+        {!loading && tickets.length === 0 && !error && (
           <p>No tickets created yet</p>
         )}
 
-        {!loading && tickets.map(ticket => (
-          <div className="ticket-card" key={ticket.ticketId}>
-            <h4>{ticket.title}</h4>
-
+        {tickets.map(t => (
+          <div className="ticket-card" key={t.ticketId}>
+            <h4>{t.title}</h4>
             <p>
-              Status:{" "}
-              <span className={`status ${ticket.status}`}>
-                {ticket.status}
-              </span>
+              Status: <span className={t.status}>{t.status}</span>
             </p>
-
-            <p>
-              Priority: <strong>{ticket.priority}</strong>
-            </p>
+            <p>Priority: {t.priority}</p>
+            <p>Category: {t.category}</p>
           </div>
         ))}
 
