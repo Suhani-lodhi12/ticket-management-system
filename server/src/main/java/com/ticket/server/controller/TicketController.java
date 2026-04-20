@@ -31,6 +31,7 @@ public class TicketController {
         this.jwtUtil = jwtUtil;
     }
 
+    // for create ticket
     @PostMapping
     public TicketResponseDTO createTicket(@RequestBody Ticket ticket) {
 
@@ -40,33 +41,50 @@ public class TicketController {
         return ticketService.mapToDTO(savedTicket);
     }
 
-// 
-
-    @GetMapping
-    public List<TicketResponseDTO> getAllTickets(
+    //
+    // USER → MY TICKETS
+    @GetMapping("/my-created")
+    public List<TicketResponseDTO> myTickets(
             @RequestHeader("Authorization") String authHeader) {
+
         String token = authHeader.substring(7);
-
-        String role = jwtUtil.extractRole(token);
-        String email = jwtUtil.extractEmail(token);
-
-        // ADMIN → all tickets
-        if (role.equals("ADMIN")) {
-            return ticketService.getAllTickets()
-                    .stream()
-                    .map(ticketService::mapToDTO)
-                    .toList();
-        }
-
-        // USER → only own tickets
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return ticketService.getTicketsByCreator(user)
-                .stream()
-                .map(ticketService::mapToDTO)
-                .toList();
+        return ticketService.getMyTickets(token);
     }
+
+    //  ADMIN → ALL TICKETS
+    @GetMapping
+    public List<TicketResponseDTO> allTickets() {
+        return ticketService.getAllTickets();
+    }
+
+
+
+
+    // @GetMapping
+    // public List<TicketResponseDTO> getAllTickets(
+    //         @RequestHeader("Authorization") String authHeader) {
+    //     String token = authHeader.substring(7);
+
+    //     String role = jwtUtil.extractRole(token);
+    //     String email = jwtUtil.extractEmail(token);
+
+    //     // ADMIN → all tickets
+    //     if (role.equals("ADMIN")) {
+    //         return ticketService.getAllTickets()
+    //                 .stream()
+    //                 .map(ticketService::mapToDTO)
+    //                 .toList();
+    //     }
+
+    //     // USER → only own tickets
+    //     User user = userService.getUserByEmail(email)
+    //             .orElseThrow(() -> new RuntimeException("User not found"));
+
+    //     return ticketService.getTicketsByCreator(user)
+    //             .stream()
+    //             .map(ticketService::mapToDTO)
+    //             .toList();
+    // }
 
     @GetMapping("/created-by/{userId}")
     public List<TicketResponseDTO> getTicketsCreatedBy(@PathVariable Long userId) {
